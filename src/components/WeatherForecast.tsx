@@ -141,7 +141,7 @@ const WeatherForecast: React.FC<WeatherForecastProps> = ({
 
       {/* 5-Day Forecast Section */}
       <h3 className="text-4xl font-semibold text-center mb-6 dark:text-gray-100">
-        5-Day Forecast
+        3 - Hour Forecast
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
         {forecastItems.map((item) => (
@@ -153,11 +153,8 @@ const WeatherForecast: React.FC<WeatherForecastProps> = ({
           >
             {/* Forecast date */}
             <p className="text-xl font-semibold mb-1 text-gray-900 dark:text-gray-200">
-              {new Date(item.dt * 1000).toLocaleDateString(undefined, {
-                weekday: "short",
-                day: "numeric",
-                month: "short",
-              })}
+              {item.dt_txt}
+              
             </p>
             <Image
               // Display the weather icon for the forecast
