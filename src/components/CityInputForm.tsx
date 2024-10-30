@@ -25,8 +25,14 @@ const CityInputForm = ({ darkMode, onSearch }: CityInputFormProps) => {
           `https://api.openweathermap.org/geo/1.0/direct?q=${inputValue}&limit=5&appid=${apiKey}`
         );
 
-        const cityNames = response.data.map((item) => item.name); // Using defined type
-        setSuggestions(cityNames);
+        // Create a Set to store unique suggestions with city and country
+        const uniqueSuggestions = new Set<string>();
+        response.data.forEach(item => {
+          const fullName = `${item.name}`; // Combine city name and country
+          uniqueSuggestions.add(fullName); // Add to Set for uniqueness
+        });
+
+        setSuggestions(Array.from(uniqueSuggestions)); // Convert Set back to Array
       } catch (error) {
         console.error("Error fetching city suggestions:", error);
         setSuggestions([]); // Clear suggestions if error occurs
