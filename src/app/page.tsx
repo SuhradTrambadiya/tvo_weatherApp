@@ -1,85 +1,97 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Navbar from "@/components/Navbar"; // Navbar component for navigation
-import WeatherForecast from "@/components/WeatherForecast"; // Component to display weather forecasts
-import CityInputForm from "@/components/CityInputForm"; // Form component to input city names
-import { WeatherResponse } from "@/Interface/Weather.Interface"; // Type definition for the weather response
-import axios from "axios"; // Importing Axios for making API requests
+import React, { useState, useEffect, useCallback } from "react";
+import Navbar from "@/components/Navbar";
+import WeatherForecast from "@/components/WeatherForecast";
+import CityInputForm from "@/components/CityInputForm";
+import { WeatherResponse, CitySuggestion } from "@/Interface/Weather.Interface";
+import axios from "axios";
 
 const App: React.FC = () => {
-  // State to manage dark mode toggle
   const [darkMode, setDarkMode] = useState<boolean>(true);
-
-  // State to manage the unit of measurement (metric or imperial)
   const [unit, setUnit] = useState<string>("metric");
-
-  // State to store weather forecast data
   const [forecastData, setForecastData] = useState<WeatherResponse | null>(null);
+  const [selectedCity, setSelectedCity] = useState<string>("Toronto");
+  const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
+  const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [inputCity, setInputCity] = useState<string>(""); // Local state for input
 
-  // State to track the currently selected city
-  const [selectedCity, setSelectedCity] = useState<string>("London");
-
-  // Function to toggle between dark mode and light mode
-  const toggleDarkMode = () => {
+  const toggleDarkMode = useCallback(() => {
     setDarkMode((prev) => !prev);
-  };
+  }, []);
 
-  // Function to fetch weather data from OpenWeather API based on city and unit
   const fetchWeatherData = async (city: string, unit: string) => {
-    // Get the API key from environment variables
     const apiKey = process.env.NEXT_PUBLIC_API_SECRET;
-
-    // Construct the API URL for fetching weather forecast
     const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=${unit}`;
 
     try {
-      // Send a request to the weather API using Axios
       const response = await axios.get(url);
-
-      // Update the forecastData state with the fetched data
-      setForecastData(response.data); // Directly set the data from the response
+      setForecastData(response.data);
     } catch (error) {
-      // Log any errors encountered during the API request
       console.error("Error fetching forecast data:", error);
     }
   };
 
-  // Handler function for searching a new city
-  const handleSearch = (city: string) => {
-    // Update the selected city state
+  const fetchCitySuggestions = async (inputValue: string) => {
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_API_SECRET;
+      const response = await axios.get<CitySuggestion[]>(`https://api.openweathermap.org/geo/1.0/direct?q=${inputValue}&limit=5&appid=${apiKey}`);
+      const newSuggestions = response.data.map(item => `${item.name}, ${item.state}, ${item.country}`);
+      setCitySuggestions(newSuggestions);
+    } catch (error) {
+      console.error("Error fetching city suggestions:", error);
+      setCitySuggestions([]); // Clear suggestions if an error occurs
+    }
+  };
+
+  const handleSearch = useCallback((city: string) => {
     setSelectedCity(city);
+    fetchWeatherData(city, unit); // Fetch weather data only on submission
+    setCitySuggestions([]); // Clear suggestions after search
+    setInputCity(""); // Clear input field after search
+  }, [unit]);
 
-    // Fetch the weather data for the newly selected city
-    fetchWeatherData(city, unit);
-  };
-
-  // Handler function for changing the measurement unit
-  const handleUnitChange = (newUnit: string) => {
-    // Update the unit state
+  const handleUnitChange = useCallback((newUnit: string) => {
     setUnit(newUnit);
-
-    // Fetch weather data for the current city with the new unit
     fetchWeatherData(selectedCity, newUnit);
-  };
+  }, [selectedCity]);
 
-  // useEffect hook to fetch weather data on component mount
   useEffect(() => {
     fetchWeatherData(selectedCity, unit);
-  }, [selectedCity,unit]); // Empty dependency array to run only once when the component mounts
+  }, [selectedCity, unit]);
+
+  const handleInputChange = (inputValue: string) => {
+    setInputCity(inputValue); // Update the local input state
+
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout);
+    }
+
+    if (inputValue.length > 0) {
+      setDebounceTimeout(
+        setTimeout(() => fetchCitySuggestions(inputValue), 300) // 300 ms debounce
+      );
+    } else {
+      setCitySuggestions([]);
+    }
+  };
 
   return (
     <div className={`app ${darkMode ? "dark" : ""}`}>
-      <div className="dark:bg-black bg-gray-100 ">
+      <div className="dark:bg-black bg-gray-100">
         <Navbar
           darkMode={darkMode}
           toggleDarkMode={toggleDarkMode}
           onUnitChange={handleUnitChange}
         />
-
         <div className="container mx-auto mt-4 p-4">
-          <CityInputForm darkMode={darkMode} onSearch={handleSearch} />
-
+          <CityInputForm
+            darkMode={darkMode}
+            city={inputCity} // Use local input state for input value
+            suggestions={citySuggestions}
+            onSearch={handleSearch} // Call weather API on search
+            onInputChange={handleInputChange} // Handle input change for suggestions
+          />
           {forecastData && (
             <WeatherForecast forecastData={forecastData} unit={unit} />
           )}

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { FaMoon, FaSun, FaCog } from "react-icons/fa";
 
 interface NavbarProps {
@@ -10,6 +10,7 @@ interface NavbarProps {
 
 const Navbar = ({ darkMode, toggleDarkMode, onUnitChange }: NavbarProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+  const [selectedUnit, setSelectedUnit] = useState<string>("metric"); // Default unit
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const toggleDropdown = () => {
@@ -30,15 +31,10 @@ const Navbar = ({ darkMode, toggleDarkMode, onUnitChange }: NavbarProps) => {
     };
   }, []);
 
-  // Memoize the toggleDarkMode and onUnitChange functions
-  const handleToggleDarkMode = useCallback(() => {
-    toggleDarkMode();
-  }, [toggleDarkMode]);
-
-  const handleUnitChange = useCallback((unit: string) => {
+  const handleUnitChange = (unit: string) => {
+    setSelectedUnit(unit);
     onUnitChange(unit);
-    setIsDropdownOpen(false);
-  }, [onUnitChange]);
+  };
 
   return (
     <nav
@@ -53,22 +49,28 @@ const Navbar = ({ darkMode, toggleDarkMode, onUnitChange }: NavbarProps) => {
 
       <div className="flex items-center space-x-4 relative">
         <button
-          onClick={handleToggleDarkMode}
+          onClick={toggleDarkMode}
           className={`p-2 rounded-md focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${
             darkMode
               ? "bg-gray-700 text-gray-100 hover:bg-gray-600"
-              : "bg-blue-300 text-gray-900 hover:bg-blue-400"
+              : "bg-gray-300 text-gray-900 hover:bg-blue-400"
           }`}
           aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
-          {darkMode ? <FaSun size={20} aria-hidden="true" /> : <FaMoon size={20} aria-hidden="true" />}
+          {darkMode ? (
+            <FaSun size={20} aria-hidden="true" />
+          ) : (
+            <FaMoon size={20} aria-hidden="true" />
+          )}
         </button>
 
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={toggleDropdown}
             className={`p-2 rounded-md focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${
-              darkMode ? "bg-gray-700 text-gray-100 hover:bg-gray-600" : "bg-blue-300 text-gray-900 hover:bg-blue-400"
+              darkMode
+                ? "bg-gray-700 text-gray-100 hover:bg-gray-600"
+                : "bg-blue-300 text-gray-900 hover:bg-blue-400"
             }`}
             aria-label="Settings"
           >
@@ -78,16 +80,21 @@ const Navbar = ({ darkMode, toggleDarkMode, onUnitChange }: NavbarProps) => {
           {isDropdownOpen && (
             <div
               className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg p-2 ${
-                darkMode ? "bg-gray-700 text-gray-100" : "bg-white text-gray-900"
+                darkMode
+                  ? "bg-gray-700 text-gray-100"
+                  : "bg-white text-gray-900"
               }`}
               role="menu"
             >
-              <p className="px-4 py-2 text-sm font-bold underline underline-offset-4">Select Unit</p>
-              
+              <p className="px-4 py-2 text-sm font-bold underline underline-offset-4">
+                Select Unit
+              </p>
+
               <button
                 onClick={() => handleUnitChange("metric")}
                 className="block w-full text-left px-4 py-2 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded-lg"
                 role="menuitem"
+                aria-selected={selectedUnit === "metric"} // Set aria-selected
               >
                 Celsius
               </button>
@@ -96,6 +103,7 @@ const Navbar = ({ darkMode, toggleDarkMode, onUnitChange }: NavbarProps) => {
                 onClick={() => handleUnitChange("imperial")}
                 className="block w-full text-left px-4 py-2 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded-lg"
                 role="menuitem"
+                aria-selected={selectedUnit === "imperial"} // Set aria-selected
               >
                 Fahrenheit
               </button>

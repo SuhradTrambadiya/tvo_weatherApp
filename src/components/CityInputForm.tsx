@@ -1,92 +1,27 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
-import axios from "axios"; // Axios for API requests
-import { CitySuggestion } from "@/Interface/Weather.Interface"; // Import the new interface
+import React, { useRef } from "react";
 
 interface CityInputFormProps {
-  darkMode: boolean; // Dark mode state to style the component based on theme
+  darkMode: boolean; 
+  city: string;
+  suggestions: string[]; 
   onSearch: (city: string) => void; // Callback function triggered on search submission
+  onInputChange: (inputValue: string) => void; // Callback to handle input change
 }
 
-const CityInputForm: React.FC<CityInputFormProps> = ({ darkMode, onSearch }) => {
-  const [city, setCity] = useState<string>("");
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+const CityInputForm = ({ darkMode, city, suggestions, onSearch, onInputChange }: CityInputFormProps) => {
   const suggestionRef = useRef<HTMLUListElement>(null);
-  const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(null);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
-    setCity(inputValue);
-
-    // Clear existing debounce timeout
-    if (debounceTimeout) {
-      clearTimeout(debounceTimeout);
-    }
-
-    // Set a new debounce timeout
-    if (inputValue.length > 0) {
-      setDebounceTimeout(
-        setTimeout(() => fetchCitySuggestions(inputValue), 300) // 300 ms debounce
-      );
-    } else {
-      setSuggestions([]); // Clear suggestions if input is empty
-    }
-  };
-
-  const fetchCitySuggestions = async (inputValue: string) => {
-    try {
-      const apiKey = process.env.NEXT_PUBLIC_API_SECRET;
-      const response = await axios.get<CitySuggestion[]>(
-        `https://api.openweathermap.org/geo/1.0/direct?q=${inputValue}&limit=5&appid=${apiKey}`
-      );
-
-      // Create a Set to store unique suggestions with city and country
-      const uniqueSuggestions = new Set<string>();
-      response.data.forEach(item => {
-        const fullName = `${item.name}, ${item.country}`; // Combine city name and country
-        uniqueSuggestions.add(fullName); // Add to Set for uniqueness
-      });
-
-      setSuggestions(Array.from(uniqueSuggestions)); // Convert Set back to Array
-    } catch (error) {
-      console.error("Error fetching city suggestions:", error);
-      setSuggestions([]); // Clear suggestions if error occurs
-      // You might want to show a toast or some notification to the user here
-    }
-  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (city) {
-      onSearch(city); // Trigger the onSearch callback with the city
-      setSuggestions([]); // Clear suggestions after search
-      setCity(""); // Reset city input
+      onSearch(city); // Trigger the onSearch callback with the city when submitted
     }
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    setCity(suggestion); // Set clicked suggestion as city
-    setSuggestions([]); // Clear suggestions after selection
+    onSearch(suggestion); // Trigger the onSearch callback with the selected suggestion
   };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        suggestionRef.current &&
-        !suggestionRef.current.contains(event.target as Node)
-      ) {
-        setSuggestions([]); // Clear suggestions if clicked outside
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      if (debounceTimeout) {
-        clearTimeout(debounceTimeout); // Clean up timeout on unmount
-      }
-    };
-  }, [debounceTimeout]);
 
   return (
     <div className={`flex flex-col items-center p-8 ${darkMode ? "text-white" : "text-gray-900"}`}>
@@ -97,8 +32,8 @@ const CityInputForm: React.FC<CityInputFormProps> = ({ darkMode, onSearch }) => 
           <div className="flex mb-4">
             <input
               type="text"
-              value={city}
-              onChange={handleInputChange}
+              value={city} // Use the input city state
+              onChange={(e) => onInputChange(e.target.value)} // Handle input change
               placeholder="Enter city name..."
               className={`flex-1 p-4 rounded-l-lg border-4 border-indigo-600 ${
                 darkMode ? "bg-gray-800 text-white border-gray-600" : "bg-white text-gray-800 border-gray-300"
@@ -135,7 +70,6 @@ const CityInputForm: React.FC<CityInputFormProps> = ({ darkMode, onSearch }) => 
                     onClick={() => handleSuggestionClick(suggestion)}
                     role="option"
                     aria-label={`Select ${suggestion}`}
-                    aria-selected={city === suggestion}
                   >
                     {suggestion}
                   </li>
