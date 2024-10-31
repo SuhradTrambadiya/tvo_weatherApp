@@ -3,15 +3,20 @@ import { WeatherResponse } from "@/Interface/Weather.Interface";
 import Image from "next/image";
 import { FaSun, FaMoon, FaEye } from "react-icons/fa";
 
+// Define the interface for the props expected by the WeatherForecast component
 interface WeatherForecastProps {
-  forecastData: WeatherResponse;
-  unit: string;
+  forecastData: WeatherResponse; // Weather data received from the API
+  unit: string; // Unit of measurement for temperature
 }
 
+// WeatherForecast functional component
 const WeatherForecast = ({ forecastData, unit }: WeatherForecastProps) => {
+  // Extract the current weather data from the forecast data
   const currentWeather = forecastData.list[0];
+  // Slice the forecast data to get the next five forecast items
   const forecastItems = forecastData.list.slice(1, 6);
 
+  // Function to get styles based on the weather condition
   const getCardStyles = (condition: string) =>
     ({
       Clear: "bg-gradient-to-r from-yellow-400 to-orange-500 text-white", // Sunny day
@@ -21,10 +26,11 @@ const WeatherForecast = ({ forecastData, unit }: WeatherForecastProps) => {
       Thunderstorm: "bg-gradient-to-r from-gray-800 to-purple-600 text-white", // Thunderstorms
       Drizzle: "bg-gradient-to-r from-teal-400 to-green-500 text-white", // Drizzle
       Mist: "bg-gradient-to-r from-gray-200 to-gray-300 text-gray-800", // Misty weather
-    }[condition] || "bg-gradient-to-r from-gray-200 to-gray-300 text-gray-800"); // Default styles
+    }[condition] || "bg-gradient-to-r from-gray-200 to-gray-300 text-gray-800"); // Default styles if no match
 
   return (
     <div className="container mx-auto p-6">
+      {/* Title with location information */}
       <h2 className="text-5xl font-bold mb-4 text-center text-gray-900 dark:text-white">
         {forecastData.city.name}, {forecastData.city.country}
       </h2>
@@ -37,6 +43,7 @@ const WeatherForecast = ({ forecastData, unit }: WeatherForecastProps) => {
             Current Weather
           </h3>
           <div className="flex items-center justify-center mb-4">
+            {/* Weather icon */}
             <Image
               src={`https://openweathermap.org/img/wn/${currentWeather.weather[0].icon}@2x.png`}
               alt="Weather Icon"
@@ -45,20 +52,24 @@ const WeatherForecast = ({ forecastData, unit }: WeatherForecastProps) => {
               className="transition-transform transform hover:scale-110"
             />
             <div className="ml-4 text-center">
+              {/* Current temperature display */}
               <p className="text-5xl font-bold">
                 {currentWeather.main.temp}°{unit === "metric" ? "C" : "F"}
               </p>
               <p className="text-lg mt-2 capitalize">
-                {currentWeather.weather[0].description}
+                {currentWeather.weather[0].description}{" "}
+                {/* Weather description */}
               </p>
             </div>
           </div>
           <div className="flex justify-around text-lg mt-4">
-            <div className="flex flex-col items-center">
+            {/* Humidity information */}
+            <div className="flex flex-col items-center bg-cyan-500 p-4 rounded-xl hover:scale-105">
               <span className="font-semibold">Humidity</span>
               <span>{currentWeather.main.humidity}%</span>
             </div>
-            <div className="flex flex-col items-center">
+            {/* Wind speed information */}
+            <div className="flex flex-col items-center bg-cyan-500 p-4 rounded-xl hover:scale-105 ">
               <span className="font-semibold">Wind</span>
               <span>
                 {currentWeather.wind.speed} {unit === "metric" ? "m/s" : "mph"}
@@ -73,6 +84,7 @@ const WeatherForecast = ({ forecastData, unit }: WeatherForecastProps) => {
             Additional Info
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Visibility information */}
             <div className="flex flex-col items-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-transform hover:scale-105">
               <div className="flex items-center justify-center space-x-2 mb-2">
                 <FaEye className="text-green-600 dark:text-green-300" />
@@ -85,6 +97,7 @@ const WeatherForecast = ({ forecastData, unit }: WeatherForecastProps) => {
               </p>
             </div>
 
+            {/* Sunrise information */}
             <div className="flex flex-col items-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-transform hover:scale-105">
               <div className="flex items-center justify-center space-x-2 mb-2">
                 <FaSun className="text-yellow-600 dark:text-yellow-300" />
@@ -103,6 +116,7 @@ const WeatherForecast = ({ forecastData, unit }: WeatherForecastProps) => {
               </p>
             </div>
 
+            {/* Sunset information */}
             <div className="flex flex-col items-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-transform hover:scale-105">
               <div className="flex items-center justify-center space-x-2 mb-2">
                 <FaMoon className="text-blue-600 dark:text-blue-300" />
@@ -120,15 +134,29 @@ const WeatherForecast = ({ forecastData, unit }: WeatherForecastProps) => {
                 )}
               </p>
             </div>
+
+            {/* Feel Like information */}
+            <div className="flex flex-col items-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-transform hover:scale-105">
+              <div className="flex items-center justify-center space-x-2 mb-2">
+                <FaSun className="text-yellow-600 dark:text-yellow-300" />
+                <h4 className="text-lg font-bold text-gray-800 dark:text-cyan-300">
+                  Feel Like
+                </h4>
+              </div>
+              <p className="text-xl text-center text-gray-800 dark:text-gray-200">
+                {currentWeather.main.feels_like}°{unit === "metric" ? "C" : "F"}
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* 5-Day Forecast Section */}
-      <h3 className="text-4xl font-semibold text-center mb-6 dark:text-white">
+      <h3 className="text-4xl font-semibold text-center mb-6 dark:text-white  ">
         3-Hour Forecast
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        {/* Mapping through the forecast items to display individual forecast cards */}
         {forecastItems.map((item) => (
           <div
             key={item.dt}
@@ -136,6 +164,7 @@ const WeatherForecast = ({ forecastData, unit }: WeatherForecastProps) => {
               item.weather[0].main
             )} flex flex-col items-center p-4 rounded-lg shadow-md transform transition-transform duration-200 hover:scale-105`}
           >
+            {/* Forecast date and time */}
             <p className="text-xl font-semibold mb-1 text-gray-800">
               {/* Increased contrast */}
               {new Date(item.dt_txt).toLocaleString([], {
