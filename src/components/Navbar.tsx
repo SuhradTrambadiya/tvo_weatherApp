@@ -11,7 +11,9 @@ interface NavbarProps {
 
 // Navbar component
 const Navbar = ({ darkMode, toggleDarkMode, onUnitChange }: NavbarProps) => {
-  let selectedUnit = "metric"; // Default selected unit
+  
+  let selectedUnit = "imperial"; // Default selected unit
+  selectedUnit="metric"
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false); // State to manage dropdown visibility
   const dropdownRef = useRef<HTMLDivElement>(null); // Ref to manage dropdown element
 
