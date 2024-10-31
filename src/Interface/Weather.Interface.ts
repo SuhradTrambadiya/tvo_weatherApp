@@ -66,3 +66,12 @@ export interface WeatherResponse {
 export interface CitySuggestion {
   name: string; 
 }
+
+export interface CitySuggestion {
+  name: string;   // City name
+  country: string; // Country name
+  state?: string;  // Optional province or state name
+  lat: number;     // Latitude
+  lon: number;     // Longitude
+}
+

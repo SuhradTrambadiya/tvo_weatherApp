@@ -43,7 +43,7 @@ const Navbar = ({ darkMode, toggleDarkMode, onUnitChange }: NavbarProps) => {
   return (
     <nav
       className={`flex items-center justify-between p-4 shadow-lg ${
-        darkMode ? "bg-gray-800 text-gray-100" : "bg-red-500 text-gray-900"
+        darkMode ? "bg-gray-800 text-gray-100" : "bg-blue-500 text-white"
       }`}
       aria-label="Main Navigation"
     >
@@ -57,7 +57,7 @@ const Navbar = ({ darkMode, toggleDarkMode, onUnitChange }: NavbarProps) => {
           className={`p-2 rounded-md focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${
             darkMode
               ? "bg-gray-700 text-gray-100 hover:bg-gray-600"
-              : "bg-gray-200 text-gray-900 hover:bg-gray-300"
+              : "bg-blue-300 text-gray-900 hover:bg-blue-400"
           }`}
           aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
@@ -68,7 +68,7 @@ const Navbar = ({ darkMode, toggleDarkMode, onUnitChange }: NavbarProps) => {
           <button
             onClick={toggleDropdown}
             className={`p-2 rounded-md focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${
-              darkMode ? "bg-gray-700 text-gray-100 hover:bg-gray-600" : "bg-gray-200 text-gray-900 hover:bg-gray-300"
+              darkMode ? "bg-gray-700 text-gray-100 hover:bg-gray-600" : "bg-blue-300 text-gray-900 hover:bg-blue-400"
             }`}
             aria-label="Settings"
           >
